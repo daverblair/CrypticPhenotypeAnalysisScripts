@@ -37,4 +37,4 @@ FitUKBBImputationModels_GBR.py: Python script used for generating the Gradient B
 
 ## GWAS
 
-compute_qrank_gwas.sh: Shell script that uses the QRankGWAS python module (see https://github.com/daverblair/QRankGWAS)to perform quantile regression genome-wide association studies.
+compute_qrank_gwas.sh: Shell script that uses the QRankGWAS python module (see https://github.com/daverblair/QRankGWAS) to perform quantile regression genome-wide association studies.
