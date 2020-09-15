@@ -17,6 +17,7 @@ This script generates the toy, simulated datasets used in Figure 1.
 """
 
 
+# sets up the plotting enivironment
 sns.set(context='talk',color_codes=True,style='ticks',font='Arial',font_scale=2,rc={'axes.linewidth':5,"font.weight":"bold",'axes.labelweight':"bold",'xtick.major.width':4,'xtick.minor.width': 2})
 cmap = cm.get_cmap('viridis', 12)
 color_list=[cmap(x) for x in [0.0,0.1,0.25,0.5,0.75,0.9,1.0]]
@@ -25,7 +26,7 @@ red_color = '#b42f2f'
 
 
 
-
+#parameters defining the toy simulation
 N=500000
 target_geno_freq=0.3
 target_effect_size=1.05
@@ -236,5 +237,5 @@ axes[5].text(axes[5].get_xlim()[0]+0.25*(axes[5].get_xlim()[1]-axes[5].get_xlim(
 axes[5].text(axes[5].get_xlim()[0]+0.25*(axes[5].get_xlim()[1]-axes[5].get_xlim()[0]),axes[5].get_ylim()[0]+0.95*(axes[5].get_ylim()[1]-axes[5].get_ylim()[0]),r'QRank$_{Ext}$ '+r'$P$-value: {0:.2g}'.format(qrank_p),fontsize=12)
 
 
-f.savefig("ToyModelBase_NEW.svg")
+f.savefig("ToyModelBase.svg")
 plt.close('all')

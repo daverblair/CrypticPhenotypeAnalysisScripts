@@ -23,8 +23,8 @@ parser.add_argument("validation_fraction",help="fraction of training dataset use
 parser.add_argument("simulation_model_rank",help="rank for model being simulated",type=int)
 parser.add_argument("inference_model_rank",help="rank for model being fit",type=int)
 parser.add_argument("output_prefix",help="prefix to write table of results",type=str)
-parser.add_argument("--isOutlier",help="prefix to write table of results",action="store_true")
-parser.add_argument("--useGPU",help="whether or not to use gpu for inference",action="store_true")
+parser.add_argument("--isOutlier",help="whether to include the disease as an outlier or not. Default is False,",action="store_true")
+parser.add_argument("--useGPU",help="whether or not to use gpu for inference. If using gpu, expects 3 additional cpu cores available to assist in data loading.",action="store_true")
 parser.add_argument("--effectiveRankThresh",help="threshold to determine effective rank. Default is 1.0/num_samples",type=float)
 args = parser.parse_args()
 
@@ -64,7 +64,6 @@ simulator = ClinicalDataSimulator(num_symptoms,sim_rank,rare_disease_freq,isOutl
 simData=simulator.GenerateClinicalData(num_samples)
 
 clinData = ClinicalDataset()
-#build arbitrary list of disease codes
 disList =list(clinData.dxCodeToDataIndexMap.keys())[0:num_symptoms+1]
 
 #load data into clinical dataset

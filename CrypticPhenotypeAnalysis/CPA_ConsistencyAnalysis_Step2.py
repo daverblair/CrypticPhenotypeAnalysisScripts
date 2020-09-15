@@ -33,7 +33,7 @@ grey_color=(0.5490196078431373, 0.5490196078431373, 0.5490196078431373)
 red_color = '#b42f2f'
 
 parser = argparse.ArgumentParser(description='Code for performing consistency analysis')
-parser.add_argument("R2_threshold",help="R^2 threshold to call replication",type=float)
+parser.add_argument("R2_threshold",help="R^2 threshold to determine replication status",type=float)
 parser.add_argument("num_replications",help="number of replications required to establish convergence",type=float)
 parser.add_argument("training_data_fraction",help="fraction of dataset used for training vs testing, required to properly perform sampling",type=float)
 parser.add_argument("input_hpo_file",help="file containing hpo annotations for disease of interest",type=str)
@@ -58,8 +58,7 @@ output_file_prefix = args.output_file_prefix
 
 def ProcrustesCompare(mat1,mat2):
     """
-    Compares similarity of two matrices according to weighted R^2 among their
-    individual components.
+    Compares similarity of two matrices according to weighted R^2 among their individual components.
     R^2 of inidividual components weighted by their magnitude to generate composite score.
     Matrcies aligned prior to comparison using orthogonal procrustes (rotation only).
     """
@@ -97,14 +96,12 @@ def SortDistanceMatrix(distMat,aggClustIntance):
 
 dis_to_term = pd.read_pickle(input_hpo_file)
 
-
-allowed_diseases = [x.strip() for x in open('../../../Data/IncludedDiseases/InclusionCriteriaDiseases.txt').readlines()]
-dis_names=pd.read_csv('../../../Data/IncludedDiseases/IncludedDiseases_NamesInheritance.txt',sep='\t')
+allowed_diseases = [x.strip() for x in open('path/to/list/of/diseases').readlines()]
+dis_names=pd.read_csv('path/to/diseaes/names',sep='\t')
 dis_names.set_index('Disease ID', drop=True, inplace=True)
 
-dataset='UCSF_MendelianDisease_HPO.pth'
 clinData=ClinicalDataset()
-clinData.ReadFromDisk('../../../Data/ClinicalRecords/'+dataset)
+clinData.ReadFromDisk('path/to/clinical/dataset')
 
 
 
@@ -119,7 +116,7 @@ for dis_index in set(allowed_diseases).intersection(dis_to_term.index):
         print('Computing matrix similarities for '+dis_index)
 
         sampler=ClinicalDatasetSampler(clinData,training_data_fraction,conditionSamplingOnDx = [dis_index],returnArrays='Torch')
-        sampler.ReadFromDisk('../../../Data/Samplers/UCSF/'+'Sampler_'+dis_index.replace(':','_'))
+        sampler.ReadFromDisk('path/to/dataset/samplers'+'Sampler_'+dis_index.replace(':','_'))
         sampler.ConvertToUnconditional()
         all_procrustes_scores=[]
         procrustes_score_matrix = np.ones((num_trials,num_trials))
@@ -127,10 +124,10 @@ for dis_index in set(allowed_diseases).intersection(dis_to_term.index):
 
         for trial_pair in itertools.combinations(range(1,num_trials+1), 2):
             vlpi_1=vLPI(sampler,max_rank)
-            vlpi_1.LoadModel('../vLPI_Inference-1/'+input_direc+'MendelianDiseaseIndex_'+dis_index.replace(':','_')+'/Models/trialNum_'+str(trial_pair[0])+'.pth')
+            vlpi_1.LoadModel('path/to/latent/pheno/models/'+input_direc+'MendelianDiseaseIndex_'+dis_index.replace(':','_')+'/Models/trialNum_'+str(trial_pair[0])+'.pth')
 
             vlpi_2=vLPI(sampler,max_rank)
-            vlpi_2.LoadModel('../vLPI_Inference-1/'+input_direc+'MendelianDiseaseIndex_'+dis_index.replace(':','_')+'/Models/trialNum_'+str(trial_pair[1])+'.pth')
+            vlpi_2.LoadModel('path/to/latent/pheno/models/'+input_direc+'MendelianDiseaseIndex_'+dis_index.replace(':','_')+'/Models/trialNum_'+str(trial_pair[1])+'.pth')
 
             risk_matrix_1=vlpi_1.ReturnComponents()
             risk_matrix_2=vlpi_2.ReturnComponents()
@@ -155,7 +152,7 @@ for dis_index in set(allowed_diseases).intersection(dis_to_term.index):
         function_clusters = ag.labels_
         results_table['Cluster Labels']+=[function_clusters]
 
-        all_summary_files = os.listdir('../ModelSelection-2/'+input_direc+'MendelianDiseaseIndex_'+dis_index.replace(':','_'))
+        all_summary_files = os.listdir('path/to/best/latent/pheno/models/'+input_direc+'MendelianDiseaseIndex_'+dis_index.replace(':','_'))
         r=re.compile('BestModelTrial_*')
         best_model_file = list(filter(r.match, all_summary_files))[0]
         top_trial=int(best_model_file.split('_')[1].strip('.pth'))

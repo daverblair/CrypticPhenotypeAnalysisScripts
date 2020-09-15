@@ -23,7 +23,7 @@ parser.add_argument("input_hpo_file",help="file containing hpo annotations for d
 parser.add_argument("model_rank",help="rank for model being fit",type=int)
 parser.add_argument("trial",help="trial number",type=str)
 parser.add_argument('covariate_set',help="str that indicates which covariates to include into the analysis. Expects: 'NULL' (none), 'ALL', or comma-sep list",type=str)
-parser.add_argument("final_error_tol",help="error tolerance on parameters for model fitting, final fit",type=float)
+parser.add_argument("final_error_tol",help="error tolerance on parameters for model fitting",type=float)
 parser.add_argument("learning_rate",help="max learning rate for SGD inference",type=float)
 parser.add_argument("batch_size",help="size of batches for learning",type=int)
 parser.add_argument("max_epochs",help="maximum number of epochs for training",type=int)
@@ -74,27 +74,30 @@ try:
 except FileExistsError:
     pass
 
+# read the hpo terms from disk
 dis_to_term = pd.read_pickle(input_hpo_file)
-dataset='UCSF_MendelianDisease_HPO.pth'
+
+#load the dataset from disk, include only the HPO terms annotated to the the disease
 clinData=ClinicalDataset()
-clinData.ReadFromDisk('../../../Data/ClinicalRecords/'+dataset)
+clinData.ReadFromDisk('path/to/clinical/record/dataset')
 annotated_terms=dis_to_term.loc[dis_index]['HPO_ICD10_ID']
 clinData.IncludeOnly(annotated_terms)
 
+#make sure the maximum rank of the model is less than the number of annotated HPO terms
 if (len(annotated_terms)-1)<rank:
     rank=len(annotated_terms)-1
 
 ## load the stored dataset sampler
 sampler=ClinicalDatasetSampler(clinData,training_data_fraction,conditionSamplingOnDx = [dis_index],returnArrays='Torch')
-sampler.ReadFromDisk('../../../Data/Samplers/UCSF/'+'Sampler_'+dis_index.replace(':','_'))
+sampler.ReadFromDisk('path/to/clinical/dataset/samplers/'+'Sampler_'+dis_index.replace(':','_'))
 
-
+#set the covariates
 if covariate_set=='NULL':
     sampler.SubsetCovariates([])
 elif covariate_set!='ALL':
     sampler.SubsetCovariates(covariate_set.split(','))
 
-
+#make sure the model hasn't been fit before. If not, then fit it and write to disk.
 if 'trialNum_'+trial+'.pth' not in os.listdir(direcPrefix+outputFileDirec+'/Models/'):
 
     sampler.ConvertToUnconditional()

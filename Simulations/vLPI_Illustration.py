@@ -21,8 +21,8 @@ red_color = (0.70588235, 0.18431373, 0.18431373,1.0)
 color_list=[cmap(x) for x in [0.0,0.1,0.25,0.5,0.75,0.9,1.0]]
 
 
+#set simulation parameters
 torch.manual_seed(1023)
-
 num_samples=100000
 num_symptoms=20
 rare_disease_freq=0.001
@@ -33,6 +33,8 @@ inf_rank=10
 isOutlier=True
 sim_rank+=(int(isOutlier))
 
+
+#simulate the data
 simulator = ClinicalDataSimulator(num_symptoms,sim_rank,rare_disease_freq,isOutlier=isOutlier)
 simData=simulator.GenerateClinicalData(num_samples)
 
@@ -47,6 +49,7 @@ clinData.ConditionOnDx([disList[-1]])
 sampler = ClinicalDatasetSampler(clinData,training_data_fraction,returnArrays='Torch',conditionSamplingOnDx = [disList[-1]])
 sampler.ConvertToUnconditional()
 
+#fit the model, unless it's alreadt been fit
 vlpiModel= vLPI(sampler,inf_rank)
 try:
     vlpiModel.LoadModel('IllustrativeExample.pth')
@@ -54,39 +57,40 @@ except FileNotFoundError:
     inference_output = vlpiModel.FitModel(batch_size=200,errorTol=(1.0/num_samples))
     vlpiModel.PackageModel('IllustrativeExample.pth')
 
+#compute cryptic phenotypes and outlier scores
 inferredCrypticPhenotypes=vlpiModel.ComputeEmbeddings((simData['incidence_data'],simData['covariate_data']))
 riskFunction=vlpiModel.ReturnComponents()
 perplexityTraining, perplexityTest=vlpiModel.ComputePerplexity(randomize=False)
 latentTraining,latentTest=vlpiModel.ComputeEmbeddings(randomize=False)
 
-
+#estimate the effective rank
 risk_matrix = np.dot(latentTraining,riskFunction)
 frac_variance=np.linalg.svd(risk_matrix,compute_uv=False)
 frac_variance=(frac_variance*frac_variance)/np.sum(frac_variance*frac_variance)
-#
-#
 effective_rank = np.sum(frac_variance>=1e-5)
 component_magnitudes = np.sqrt(np.sum(riskFunction**2,axis=1))
 allowed_components=np.argsort(component_magnitudes)[::-1][0:effective_rank]
 
 
+# isolate the top performing cryptic phenotype
 sampler.RevertToConditional()
 train_data=sampler.ReturnFullTrainingDataset(randomize=False)
 test_data=sampler.ReturnFullTestingDataset(randomize=False)
 
 top_component = allowed_components[0]
 top_component_precision = average_precision_score(train_data[2].numpy(),latentTraining[:,top_component])
-
 for new_component in allowed_components[1:]:
     new_component_precision = average_precision_score(train_data[2].numpy(),latentTraining[:,new_component])
     if new_component_precision > top_component_precision:
         top_component=new_component
         top_component_precision=new_component_precision
 
-#
+# compare the performance of the spectrum and outlier models
 precision_spectrum_model=average_precision_score(test_data[2].numpy(),latentTest[:,top_component])
 precision_outlier_model=average_precision_score(test_data[2].numpy(),perplexityTest)
-#
+
+
+# make the figures
 f,axes = plt.subplots(1, 1,figsize=(8,16))
 axes.tick_params(axis='x',which='both',bottom=False,top=False,labelbottom=False)
 axes.tick_params(axis='y',which='both',left=False,right=False,labelleft=False)
@@ -110,7 +114,7 @@ fig, ax = plt.subplots(figsize=(10, 8))
 
 xmin=np.floor(inferredCrypticPhenotypes[:,allowed_components].min())
 xmax=np.ceil(inferredCrypticPhenotypes[:,allowed_components].max())
-# ax.set_xlim(xmin,xmax)
+
 
 g = ax.hexbin(inferredCrypticPhenotypes[:,allowed_components[0]],inferredCrypticPhenotypes[:,allowed_components[1]],cmap=cmap,marginals=False,mincnt=None,bins='log',gridsize=30,extent=[xmin,xmax,xmin,xmax])
 ax.plot(inferredCrypticPhenotypes[simData['target_dis_dx']==1,allowed_components[0]],inferredCrypticPhenotypes[simData['target_dis_dx']==1,allowed_components[1]],lw=0.0,marker='^',ms=15,color=red_color,label='Dx with Rare Disease')
