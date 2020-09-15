@@ -20,7 +20,7 @@ The scripts used for Cryptic Phenotype Analysis (CPA). The details of this analy
 
 CPA_vLPI_Fit_Step1.py: Fits the latent phenotype model to some observed symptom dataset. The model is saved to disk. Type 'python CPA_vLPI_Fit_Step1.py -h' for command line arguments.  
 
-CPA_Model_Selection_Step1.py: Compares all the different models fit to a single disease, identifies the one with the lowest perplexity. Type 'python CPA_Model_Selection_Step1.py -h' for command line arguments.  
+CPA_Model_Selection_Step1-2.py: Compares all the different models fit to a single disease, identifies the one with the lowest perplexity. Type 'python CPA_Model_Selection_Step1-2.py -h' for command line arguments.  
 
 CPA_ConsistencyAnalysis_Step2.py: Performs the consistency checks for the different model inference trials. Corresponds to Step 2 of Supplementary Figure 5. Type 'python CPA_ConsistencyAnalysis_Step2.py -h' for command line arguments.
 
