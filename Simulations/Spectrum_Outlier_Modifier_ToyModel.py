@@ -17,7 +17,6 @@ This script generates the toy, simulated datasets used in Figure 1.
 """
 
 
-# sets up the plotting enivironment
 sns.set(context='talk',color_codes=True,style='ticks',font='Arial',font_scale=2,rc={'axes.linewidth':5,"font.weight":"bold",'axes.labelweight':"bold",'xtick.major.width':4,'xtick.minor.width': 2})
 cmap = cm.get_cmap('viridis', 12)
 color_list=[cmap(x) for x in [0.0,0.1,0.25,0.5,0.75,0.9,1.0]]
@@ -26,7 +25,7 @@ red_color = '#b42f2f'
 
 
 
-#parameters defining the toy simulation
+
 N=500000
 target_geno_freq=0.3
 target_effect_size=1.05
@@ -50,9 +49,10 @@ base_phenotype=additive_background+mendelian_genotypes*mendelian_disease_effect
 obs_phenotype=base_phenotype+norm(mendelian_disease_effect,1.0).cdf(base_phenotype)*(general_modifier_effects+genotype*target_effect_size)
 
 genotype_quantiles={}
+genotype_means={}
 for i,geno in enumerate(genotype_strings):
     genotype_quantiles[geno]=mquantiles(obs_phenotype[genotype==i],prob=quantiles)
-
+    genotype_means[geno]=np.mean(obs_phenotype[genotype==i])
 
 
 
@@ -132,14 +132,17 @@ axes[2].legend(loc='best',frameon=False,prop={'size': 18})
 
 #boxen plot
 fig_table = pd.DataFrame({'Cryptic Phenotype Severity':obs_phenotype,'Genotype':genotype_strings[genotype]})
-sns.boxenplot(x='Genotype',y='Cryptic Phenotype Severity',data=fig_table,scale='linear',order=genotype_strings,color=grey_color,saturation=1.0,showfliers=False,ax=axes[4])
+sns.boxenplot(x='Genotype',y='Cryptic Phenotype Severity',data=fig_table,scale='linear',order=genotype_strings,color=grey_color,saturation=1.0,showfliers=False,ax=axes[4],k_depth='proportion',outlier_prop=0.001)
 q_array=np.zeros((len(quantiles),3))
+
 
 for i,geno in enumerate(genotype_quantiles.keys()):
     q_array[:,i]=genotype_quantiles[geno]
 
+
 for i,q in enumerate(quantiles):
     axes[4].plot(range(len(genotype_strings)),q_array[i],'-o',ms=15,mew=0.0,label='{0:g}th Percentile'.format(q*100),color=color_list[i*2])
+axes[4].plot(range(len(genotype_strings)),genotype_means.values(),'*',ms=25,mew=0.0,label='Mean',color=red_color)
 axes[4].legend(loc='best',frameon=False,prop={'size': 18})
 
 linmod_p=linregress(genotype,obs_phenotype).pvalue
@@ -167,9 +170,10 @@ base_phenotype=additive_background+mendelian_genotypes*mendelian_disease_effect
 obs_phenotype=base_phenotype+norm(mendelian_disease_effect,1.0).cdf(base_phenotype)*(general_modifier_effects+genotype*target_effect_size)
 
 genotype_quantiles={}
+genotype_means={}
 for i,geno in enumerate(genotype_strings):
     genotype_quantiles[geno]=mquantiles(obs_phenotype[genotype==i],prob=quantiles)
-
+    genotype_means[geno]=np.mean(obs_phenotype[genotype==i])
 
 bins=np.linspace(np.floor(obs_phenotype.min()),np.ceil(obs_phenotype.max()),50)
 est_quantile_values=mquantiles(obs_phenotype,prob=[0.5,0.9,0.999],alphap=0.0,betap=1.0)
@@ -217,9 +221,8 @@ axes[3].legend(loc='best',frameon=False,prop={'size': 18})
 
 
 
-#boxen plot
 fig_table = pd.DataFrame({'Cryptic Phenotype Severity':obs_phenotype,'Genotype':genotype_strings[genotype]})
-sns.boxenplot(x='Genotype',y='Cryptic Phenotype Severity',data=fig_table,scale='linear',order=genotype_strings,color=grey_color,saturation=1.0,showfliers=False,ax=axes[5])
+sns.boxenplot(x='Genotype',y='Cryptic Phenotype Severity',data=fig_table,scale='linear',order=genotype_strings,color=grey_color,saturation=1.0,showfliers=False,ax=axes[5],k_depth='proportion',outlier_prop=0.001)
 q_array=np.zeros((len(quantiles),3))
 
 for i,geno in enumerate(genotype_quantiles.keys()):
@@ -227,6 +230,7 @@ for i,geno in enumerate(genotype_quantiles.keys()):
 
 for i,q in enumerate(quantiles):
     axes[5].plot(range(len(genotype_strings)),q_array[i],'-o',ms=15,mew=0.0,label='{0:g}th Percentile'.format(q*100),color=color_list[i*2])
+axes[5].plot(range(len(genotype_strings)),genotype_means.values(),'*',ms=25,mew=0.0,label='Mean',color=red_color)
 axes[5].legend(loc='best',frameon=False,prop={'size': 18})
 
 linmod_p=linregress(genotype,obs_phenotype).pvalue
