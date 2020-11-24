@@ -6,19 +6,25 @@ This directory contains the scripts that were used to perform the analyses descr
 
 ## Simulations
 
-This directory contains scripts used to the simulate data that used to construct the illustrative Figure 1 and illustrative Figure 2A. It also contains the script used to conduct the simulations depicted in Figures 2B and C.
+This directory contains scripts used to the simulate data depicted in Figure 1 and Figure 2A. It also contains the script used to conduct the simulations depicted in Figures 2B and C.
 
-Spectrum_Outlier_Modifier_ToyModel.py: The toy model used to describe the morbidity-dependent genetic effects.
+Spectrum_Outlier_Modifier_ToyModel.py: The toy model used to describe the morbidity-dependent genetic effects. Figure 1
+
 
 vLPI_Illustration.py: The simulation used to construct Figure 2A.
 
-vLPI_Sim.py: Script used to generate arbitrary simulated, disease symptom datasets. Type 'python vLPI_Sim.py -h' for command line arguments.
+IllustrativeExample.pth: Storage file for the vlpi model inferred in Figure 2A.
+
+vLPI_Sim.py: Script used to generate arbitrary simulated, disease symptom datasets (depicted in Figures 2B, C). Type 'python vLPI_Sim.py -h' for command line arguments.
+
+
 
 ## CrypticPhenotypeAnalysis
 
 This directory contains the scripts used for Cryptic Phenotype Analysis (CPA). The details of this analysis are described in the Supplementary Methods. Supplementary Figure 5 depicts the overall CPA pipeline, and the steps performed by each script are provided in the file name. The final output of this analysis is depicted in Figures 2D and 2E.
 
 CPA_vLPI_Fit_Step1.py: Fits the latent phenotype model to some observed symptom dataset. The model is saved to disk. Type 'python CPA_vLPI_Fit_Step1.py -h' for command line arguments.  
+
 
 CPA_Model_Selection_Step1-2.py: Compares all the different models fit to a single disease and identifies the one with the lowest perplexity. Type 'python CPA_Model_Selection_Step1-2.py -h' for command line arguments.  
 
