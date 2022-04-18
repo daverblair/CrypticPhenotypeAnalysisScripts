@@ -6,6 +6,6 @@ authors:
   orcid: "https://orcid.org/0000-0002-7455-6488"
 title: "Common genetic variation associated with Mendelian disease severity revealed through cryptic phenotype analysis"
 version: 0.0.1
-doi:
+doi: https://doi.org/10.5281/zenodo.6468762
 date-released: 2022-04-18
 url: "https://github.com/daverblair/CrypticPhenotypeAnalysisScripts"
