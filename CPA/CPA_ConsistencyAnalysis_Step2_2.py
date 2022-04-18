@@ -22,7 +22,7 @@ import seaborn as sns
 from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 
 """
-This script performs the consistency analysis. It corresponds to Step 2 of Supplemental Figure 5.
+This script performs the consistency analysis. It corresponds to Step 2 of Supplementary Figure 5.
 """
 
 

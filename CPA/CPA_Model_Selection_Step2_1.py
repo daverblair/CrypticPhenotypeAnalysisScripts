@@ -10,7 +10,7 @@ from sklearn.utils import resample
 from sklearn.metrics import precision_recall_curve,average_precision_score
 
 """
-This script selects the top perfroming model from some set contained within the input directory. It is included in Step 1 of Supplemental Figure 5.
+This script selects the top perfroming model from some set contained within the input directory. It is included in Step 1 of Supplementary Figure 5. Note, model selection is performed in the training dataset to preserve the testing dataset for final validation.
 """
 
 parser = argparse.ArgumentParser(description='Code for model selection')

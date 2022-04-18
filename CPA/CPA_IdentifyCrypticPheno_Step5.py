@@ -8,11 +8,8 @@ from vlpi.vLPI import vLPI
 from sklearn.metrics import average_precision_score
 
 """
-This script performs is used to assign the cryptic phenotype for each model and compare the outlier/spectrum scores. It corresponds to Steps 5 and 6 of Supplemental Figure 5.
+This script performs is used to assign the cryptic phenotype for each model. It corresponds to Steps 5 of Supplementary Figure 5. This script can perform this task for either the UCSF or UKBB models.
 """
-
-
-
 
 
 parser = argparse.ArgumentParser(description='Code for comparing outlier vs extreme models')
@@ -32,7 +29,7 @@ effective_rank_threshold = args.effective_rank_threshold
 
 #load HPO annotation data and list of diseases
 dis_to_term = pd.read_pickle('path/to/input/HPO/terms')
-revised_dis_to_term = pd.read_pickle('path/to//revised/input/HPO/terms')
+revised_dis_to_term = pd.read_pickle('path/to/revised/input/HPO/terms')
 allowed_diseases = [x.strip() for x in open('path/to/file/containing/list/of/diseases').readlines()]
 
 
@@ -45,10 +42,10 @@ except FileExistsError:
     pass
 
 #load effective rank data and modeling results
-effective_rank_table = pd.read_pickle('path/to/effective/rank/table')
-model_table=pd.read_pickle('path/to/model/results/table')
+effective_rank_table = pd.read_pickle('path/to/table/of/model/effective/rank/info')
+model_table=pd.read_pickle('path/to/table/of/model/summary/results')
 
-if dis_index.replace(':','_')+'_DiagnosisPredictionScores.pth' not in os.listdir(output_direc):
+if dis_index.replace(':','_')+'_TopComponents.pth' not in os.listdir(output_direc):
     #load clinical data
     clinData=ClinicalDataset()
     clinData.ReadFromDisk('path/to/clinical/dataset')
@@ -74,7 +71,7 @@ if dis_index.replace(':','_')+'_DiagnosisPredictionScores.pth' not in os.listdir
     #load the top peforming model
     sampler.ConvertToUnconditional()
     bestVLPIModel= vLPI(sampler,max_rank)
-    bestVLPIModel.LoadModel('../FinalModels-4/Models/'+dis_index.replace(':','_')+'.pth')
+    bestVLPIModel.LoadModel('/path/to/models/'+dis_index.replace(':','_')+'.pth')
 
     #compute the latent phenotypes and perplexities for the top performing model
     train_embeddings,test_embeddings = bestVLPIModel.ComputeEmbeddings()
@@ -109,36 +106,11 @@ if dis_index.replace(':','_')+'_DiagnosisPredictionScores.pth' not in os.listdir
             top_component_precision=new_component_precision
     max_score=test_embeddings[:,top_component]
 
-    # compare outlier model and top performing latent phenotype on test dataset
+    # compare outlier model and top performing latent phenotype on test dataset in terms of rare disease identification in test dataset. Note, only the extremum score (increase in ) was used in Blair et al 2022. Additional work focusing on using outlier detection to identify rare disease cases is in progress.
     final_results_table = {'OMIM_ICD_ID':[dis_index],'Top Component':[top_component]}
-    final_results_table['Outlier Score (OS)'] = [{'Avg Precision':average_precision_score(test_data[2].toarray(),test_perplex),'95% CI':np.zeros(2)}]
-    final_results_table['Extremum Score (ES)'] = [{'Avg Precision':average_precision_score(test_data[2].toarray(),max_score),'95% CI':np.zeros(2)}]
 
-    #generate bootstrapped p-value for the comparison
-    resampled_max_scores = np.zeros(num_resamples)
-    resampled_outlier_scores = np.zeros(num_resamples)
-
-    for i in range(num_resamples):
-        new_index=np.random.randint(0,test_data[2].shape[0],test_data[2].shape[0])
-        if test_data[2][new_index].sum()>0:
-            resampled_max_scores[i]=average_precision_score(test_data[2].toarray().ravel()[new_index],max_score[new_index])
-            resampled_outlier_scores[i]=average_precision_score(test_data[2].toarray().ravel()[new_index],test_perplex[new_index])
-
-    final_results_table['H0: OS <= ES'] = np.sum(resampled_max_scores>=resampled_outlier_scores)/resampled_outlier_scores.shape[0]
-
-
-    #generate 95% CIs for scores
-    name_index = ['Outlier Score (OS)','Extremum Score (ES)']
-    name_samples={'Outlier Score (OS)':resampled_outlier_scores,'Extremum Score (ES)':resampled_max_scores}
-
-
-    for score in name_index:
-        sorted_scores=np.sort(name_samples[score])
-        lowIndex = int(np.floor(sorted_scores.shape[0]*0.025))-1
-        highIndex = int(np.ceil(sorted_scores.shape[0]*0.975))-1
-        final_results_table[score][0]['95% CI'][:]=sorted_scores[[lowIndex,highIndex]]
 
     #save results to disk
     df = pd.DataFrame(final_results_table)
     df.set_index('OMIM_ICD_ID',drop=True,inplace=True)
-    df.to_pickle(output_direc+dis_index.replace(':','_')+'_DiagnosisPredictionScores.pth')
+    df.to_pickle(output_direc+dis_index.replace(':','_')+'_TopComponents.pth')

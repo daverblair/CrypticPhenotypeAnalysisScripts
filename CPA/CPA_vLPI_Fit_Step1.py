@@ -10,7 +10,7 @@ from vlpi.data.ClinicalDataset import ClinicalDataset,ClinicalDatasetSampler
 from vlpi.vLPI import vLPI
 
 """
-This script fits the latent phenotype model to the symptom sets. It corresponds to Step 1 of Supplemental Figure 5.
+This script fits the latent phenotype model to the symptom sets. It corresponds to Step 1 of Supplementary Figure 5.
 """
 
 
@@ -22,7 +22,7 @@ parser.add_argument("dis_index",help="index for the disease being computed",type
 parser.add_argument("input_hpo_file",help="file containing hpo annotations for disease of interest",type=str)
 parser.add_argument("model_rank",help="rank for model being fit",type=int)
 parser.add_argument("trial",help="trial number",type=str)
-parser.add_argument('covariate_set',help="str that indicates which covariates to include into the analysis. Expects: 'NULL' (none), 'ALL', or comma-sep list",type=str)
+parser.add_argument('covariate_set',help="str that indicates which covariates to include into the analysis. Expects: 'NULL' (none), 'ALL', or comma-sep list. Blair et al. 2022 used NULL but included covariates in downstream analyses.",type=str)
 parser.add_argument("final_error_tol",help="error tolerance on parameters for model fitting",type=float)
 parser.add_argument("learning_rate",help="max learning rate for SGD inference",type=float)
 parser.add_argument("batch_size",help="size of batches for learning",type=int)
