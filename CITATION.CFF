@@ -10,6 +10,6 @@ authors:
   given-names:  "Joseph T"
 title: "Common genetic variation associated with Mendelian disease severity revealed through cryptic phenotype analysis"
 version: 0.0.1
-doi: https://doi.org/10.5281/zenodo.6468762
+doi: 10.5281/zenodo.6468762
 date-released: 2022-04-18
 url: "https://github.com/daverblair/CrypticPhenotypeAnalysisScripts"
